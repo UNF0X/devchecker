@@ -1,15 +1,14 @@
 // ==UserScript==
 // @name         DevChecker
 // @namespace    http://tampermonkey.net/
-// @version      1.5.8
+// @version      1.5.9
 // @description  Check Developers and testers in vk.com! Editor slmatthew
 // @updateURL https://openuserjs.org/meta/matuhak/DevChecker.meta.js
-// @copyright 2018, slmatthew (https://vk.com/matkrut)
+// @copyright 2018, slmatthew (https://vk.com/slmatthew)
 // @license MIT
-// @author       slmatthew
+// @author       Flyink, severecloud, slmatthew
 // @match        https://vk.com/*
 // @grant        GM_xmlhttpRequest
-// @connect      itnull.severecloud.me
 // ==/UserScript==
 
 //Чекаем версию
@@ -46,7 +45,7 @@ function DevUsers() {
             background: "url(https://pp.userapi.com/c637621/v637621394/59591/XWk69t0P1Iw.jpg?ava=1) center/cover"
         },
         "134304772": {
-            title: "Тестер, *",
+            title: "VK Testers",
             href: "https://vk.com/bugtracker?act=reporter&id=*",
             background: "url(https://pp.userapi.com/c639625/v639625391/42408/zj0kpTaIKiI.jpg?ava=1) center/cover"
         },
@@ -101,7 +100,7 @@ function DevUsers() {
     }
 
     function checkLinks(el) { // Функция поиска в элементе ссылок
-        var links = el.querySelectorAll('.im-mess-stack--lnk, .author, .friends_field a, .im-member-item--name a, .labeled.name a, .mention_tt_name, .group_u_title, div.Entity__title a.Link');
+        var links = el.querySelectorAll('.im-mess-stack--lnk, .author, .friends_field a, .im-member-item--name a, .labeled.name a, .mention_tt_name, .group_u_title, div.Entity__title a.Link, .bp_author');
         if (!links) return; // Если в элементе нет ссылок, то пропускаем
         Array.from(links).map(function (link) { // Если есть, то перебираем
             if (link.checked) return; // Если ссылка проверена, то пропускаем
@@ -123,7 +122,7 @@ function DevUsers() {
                 showTooltip(icon, {
                     force: 1,
                     black: 1,
-                    content: '<div class="tt_text wrapped">' + groups[type].title.replace("*", info.score) + '</div>'
+                    content: '<div class="tt_text wrapped">' + groups[type].title + '</div>'
                 });
             };
             link.appendChild(icon); // Добавляем ссылку в ссылку
@@ -175,15 +174,6 @@ function DevUsers() {
         }).then(function (r) { // Ждем результат
             cache[screen_name] = r.response; // Записываем результат в кэш
             cache[screen_name].updated = Date.now() + 864e5; // Записываем время через которое нужно повторить запрос
-            var request = new XMLHttpRequest();
-            request.open("GET", "https://itnull.severecloud.me/user.score/"+cache[screen_name].user_id, true);
-            request.send();
-            request.onreadystatechange = function() { //Запрос отчётов
-                if (request.readyState != 4) return;
-                var statuss = request.status;
-                if(statuss==200)
-                    cache[screen_name].score = request.responseText;
-            };
             if (r.response.types.length || !r.response.user_id) // Если юзер есть в группах или это не юзер,
                 localStorage.devUsersCache2 = JSON.stringify(cache); // то записываем кэш в localStorage
             drawIcons(link, r.response); // Рисуем иконки
